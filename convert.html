@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<div id="thediv"></div><br><br>
+	<div id="thedivII"></div>
+	<input type="file" />
+	<script type="text/javascript">
+		const input = document.querySelector('input[type="file"]');
+		const listener = input.addEventListener('change', function(e) {
+			const reader = new FileReader();
+			reader.onload = function() {
+				
+				// reading data
+				var vertices = [];
+				var texCoord = [];
+				var faces = [];
+				var file = reader.result;
+				var char = file.split(/\s+/);
+				for (var i = 0; i<char.length; ) {
+					if (char[i]=="v") {
+						vertices.push([char[i+1], char[i+2], char[i+3]]);
+						i+=3;
+					}
+					if (char[i]=="vt") {
+						texCoord.push([char[i+1], char[i+2]]);
+						i+=2;
+					}
+					if (char[i]=="f") {
+						faces.push([char[i+1], char[i+2], char[i+3]]);
+						i+=3;
+					}
+					else {
+						i++;
+					}
+				}
+				var resultStr = "export const vertices = new Float32Array([";
+				for (var j = 0; j<vertices.length; j++) {
+					var str = vertices[j][0]+", "+vertices[j][1]+", "+vertices[j][2]+", 1, "+texCoord[j][0]+", "+texCoord[j][1]+",\n";
+					/*
+					- same vertices with randomized texture coordinates, uncomment if desired -
+					var str = vertices[j][0]+", "+vertices[j][1]+", "+vertices[j][2]+", 1, "+Math.random()+", "+Math.random()+",\n"; 
+					*/
+					// appends new six values
+					resultStr = resultStr.concat(str); 
+				}
+				resultStr = resultStr.concat("]);\n");
+				var resultStrTwo = "export const indices = new Uint16Array([";
+				for (var k = 0; k<faces.length; k+=3) {
+					var str = faces[k]+", "+faces[k+1]+", "+faces[k+2]+", ";
+					resultStrTwo = resultStrTwo.concat(str);
+				}
+				resultStrTwo = resultStrTwo.concat("]);");
+				// write into HTML document
+				document.getElementById("thediv").innerHTML = resultStr; 
+				document.getElementById("thedivII").innerHTML = resultStrTwo;
+				console.log(faces);
+			}
+			reader.readAsText(input.files[0]);
+		}, false);
+	</script>
+</body>
+</html>
